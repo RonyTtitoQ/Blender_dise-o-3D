@@ -25,14 +25,42 @@
 
   *{ box-sizing: border-box; margin:0; padding:0; }
 
-  html{ scroll-behavior: smooth; }
+  html{
+    scroll-behavior: smooth;
+    background: var(--bg);
+  }
 
   body{
-    background: var(--bg);
+    background: transparent;
     color: var(--text);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+  }
+
+  /* ---------- video de fondo fijo (efecto parallax) ---------- */
+  .bg-video{
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .bg-video video{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(1.15) brightness(0.5) contrast(1.05);
+    transform: scale(1.02);
+  }
+
+  .bg-video-overlay{
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 85% 55% at 50% 0%, rgba(19,20,24,0.55), rgba(19,20,24,0.88) 68%),
+      linear-gradient(180deg, rgba(19,20,24,0.82) 0%, rgba(19,20,24,0.4) 26%, rgba(19,20,24,0.55) 60%, rgba(19,20,24,0.92) 100%);
   }
 
   /* ---------- fondo cuadriculado tipo viewport ---------- */
@@ -73,7 +101,8 @@
     justify-content:space-between;
     padding: 22px 48px;
     border-bottom: 1px solid var(--panel-line);
-    backdrop-filter: blur(6px);
+    background: rgba(19,20,24,0.45);
+    backdrop-filter: blur(10px);
   }
 
   .logo{
@@ -141,6 +170,7 @@
     font-size: clamp(2.4rem, 5vw, 3.6rem);
     line-height: 1.05;
     letter-spacing: -0.01em;
+    text-shadow: 0 4px 24px rgba(0,0,0,0.5);
   }
 
   h1 span{ color: var(--accent); }
@@ -231,7 +261,8 @@
     padding: 12px 18px;
     border: 1px solid var(--panel-line);
     border-radius: 4px;
-    background: rgba(255,255,255,0.015);
+    background: rgba(19,20,24,0.55);
+    backdrop-filter: blur(8px);
     font-family:'IBM Plex Mono', monospace;
     font-size: 0.7rem;
     color: var(--text-faint);
@@ -386,6 +417,147 @@
   .corner-tag.tr{ top:10px; right:10px; }
   .corner-tag.bl{ bottom:10px; left:10px; }
 
+  /* enlace que abre el trabajo en pantalla grande */
+  .card-expand-link{
+    display:block;
+    position: relative;
+    cursor: zoom-in;
+  }
+
+  .expand-hint{
+    position:absolute;
+    bottom:10px; right:10px;
+    z-index:3;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding: 6px 10px;
+    border-radius: 3px;
+    background: rgba(16,17,22,0.65);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.02em;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .25s ease, transform .25s ease, color .25s ease, border-color .25s ease;
+    pointer-events:none;
+  }
+  .expand-hint svg{ width:12px; height:12px; display:block; }
+  .card:hover .expand-hint{
+    opacity: 1;
+    transform: translateY(0);
+    color: var(--text);
+    border-color: rgba(255,122,26,0.35);
+  }
+
+  /* ---------- lightbox / pantalla grande (solo CSS, sin JS) ---------- */
+  .lightbox{
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox:target{ display: flex; }
+
+  .lightbox-backdrop{
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,13,0.92);
+    backdrop-filter: blur(4px);
+  }
+
+  .lightbox-content{
+    position: relative;
+    z-index: 1;
+    width: min(92vw, 1180px);
+    max-height: 88vh;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 40px 90px -30px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,122,26,0.12);
+    animation: lightbox-in .25s ease;
+  }
+
+  @keyframes lightbox-in{
+    from{ opacity:0; transform: scale(0.97); }
+    to{ opacity:1; transform: scale(1); }
+  }
+
+  .lightbox-stage{
+    position: relative;
+    width: 100%;
+    max-height: 74vh;
+    background: #0b0c0f;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .lightbox-stage video,
+  .lightbox-stage img{
+    width: 100%;
+    max-height: 74vh;
+    object-fit: contain;
+    display:block;
+  }
+
+  .lightbox-info{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 20px;
+    padding: 16px 22px;
+    border-top: 1px solid var(--panel-line);
+  }
+
+  .lightbox-info h3{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .lightbox-info p{
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    margin-top: 4px;
+  }
+
+  .lightbox-close{
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(16,17,22,0.7);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .lightbox-close:hover{
+    background: rgba(255,122,26,0.2);
+    border-color: var(--accent);
+    transform: rotate(90deg);
+  }
+
+  @media (max-width: 860px){
+    .lightbox-content{ width: 95vw; max-height: 92vh; }
+    .lightbox-stage, .lightbox-stage video, .lightbox-stage img{ max-height: 60vh; }
+    .lightbox-info{ flex-direction: column; align-items:flex-start; gap:4px; }
+  }
+
   .card-body{
     padding: 20px 22px 24px;
   }
@@ -487,6 +659,11 @@
 </head>
 <body>
 
+<div class="bg-video">
+  <video src="video/Trabajo1.mp4" autoplay loop muted playsinline></video>
+  <div class="bg-video-overlay"></div>
+</div>
+
 <div class="viewport-grid"></div>
 
 <header>
@@ -547,12 +724,18 @@
          y pégalo antes de la tarjeta "Añadir trabajo". Cambia el número, título, descripción,
          imagen y etiquetas. -->
     <article class="card">
-      <div class="card-viewport">
-        <video src="video/Bob.mp4" autoplay loop muted playsinline></video>
-        <div class="corner-tag tl">CYCLES</div>
-        <div class="corner-tag tr">1920×1080</div>
-        <div class="corner-tag bl">24 fps</div>
-      </div>
+      <a class="card-expand-link" href="#lightbox-1">
+        <div class="card-viewport">
+          <video src="video/Bob.mp4" autoplay loop muted playsinline></video>
+          <div class="corner-tag tl">CYCLES</div>
+          <div class="corner-tag tr">1920×1080</div>
+          <div class="corner-tag bl">24 fps</div>
+          <span class="expand-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+            Ver en grande
+          </span>
+        </div>
+      </a>
       <div class="card-body">
         <div class="card-index">TRABAJO / 01</div>
         <h3 class="card-title">Bob Esponja</h3>
@@ -581,6 +764,29 @@
   <span>© 2026 Rony — Computación e Informática</span>
   <span>Hecho con Blender + código</span>
 </footer>
+
+<!-- ===================== PANTALLA GRANDE — TRABAJO 1 =====================
+     Para agregar la pantalla grande de un nuevo trabajo, copia todo este bloque
+     <div class="lightbox" id="lightbox-N">...</div>, cambia el número N (debe
+     coincidir con el href="#lightbox-N" de la tarjeta), el video/imagen, el
+     título y la descripción. -->
+<div class="lightbox" id="lightbox-1">
+  <a href="#" class="lightbox-backdrop" aria-label="Cerrar"></a>
+  <div class="lightbox-content">
+    <a href="#" class="lightbox-close" aria-label="Cerrar">✕</a>
+    <div class="lightbox-stage">
+      <video src="video/Bob.mp4" autoplay loop muted playsinline controls></video>
+    </div>
+    <div class="lightbox-info">
+      <div>
+        <h3>Bob Esponja</h3>
+        <p>Diseño de 3d de Bob Esponja hecho en blender.</p>
+      </div>
+      <span class="card-index">TRABAJO / 01</span>
+    </div>
+  </div>
+</div>
+<!-- =================== FIN PANTALLA GRANDE — TRABAJO 1 ==================== -->
 
 </body>
 </html>
